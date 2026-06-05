@@ -63,4 +63,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sections.forEach(s => observer.observe(s));
   }
+
+  // Simple screener behavior: populate sample data from the ranking table if available
+  const screenerRun = document.getElementById('screener-run');
+  if (screenerRun) {
+    screenerRun.addEventListener('click', () => {
+      const minRev = Number(document.getElementById('screener-min-rev').value) || 0;
+      const minMargin = Number(document.getElementById('screener-min-margin').value) || -999;
+      const rankingRows = Array.from(document.querySelectorAll('#ranking-table tbody tr'));
+      const resultsBody = document.querySelector('#screener-results tbody');
+      resultsBody.innerHTML = '';
+      // If no ranking rows, show a placeholder
+      if (!rankingRows.length) {
+        const r = document.createElement('tr');
+        r.innerHTML = '<td colspan="5" style="color:var(--text-muted);">No hay datos de comparables en la tabla de ranking.</td>';
+        resultsBody.appendChild(r);
+        return;
+      }
+      let idx = 1;
+      rankingRows.forEach(tr => {
+        const cols = tr.querySelectorAll('td');
+        if (!cols.length) return;
+        const name = cols[1]?.innerText || '';
+        const city = cols[2]?.innerText || '';
+        const ingresosText = cols[3]?.innerText || '0';
+        const ingresos = Number(ingresosText.replace(/[^0-9.-]+/g, '')) || 0;
+        const marginText = cols[5]?.innerText || '0';
+        const margin = Number(marginText.replace(/[^0-9.-]+/g, '')) || 0;
+        if (ingresos >= minRev && margin >= minMargin) {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${idx++}</td><td>${name}</td><td>${city}</td><td style="text-align:right">${(ingresos/1e6).toFixed(2)}</td><td style="text-align:right">${margin}</td>`;
+          resultsBody.appendChild(row);
+        }
+      });
+      if (!resultsBody.querySelector('tr')) {
+        const r = document.createElement('tr');
+        r.innerHTML = '<td colspan="5" style="color:var(--text-muted);">No se encontraron comparables con esos criterios.</td>';
+        resultsBody.appendChild(r);
+      }
+      // scroll to results
+      document.getElementById('screener')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
 });

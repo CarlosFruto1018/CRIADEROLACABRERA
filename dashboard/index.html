@@ -38,7 +38,7 @@
           <li class="menu-item"><a href="./index.html#indicators"><i class="fa-solid fa-wave-square"></i><span class="label">Indicadores</span></a></li>
           <li class="menu-item"><a href="./index.html#benchmark"><i class="fa-solid fa-users-line"></i><span class="label">Benchmark Sectorial</span></a></li>
           <li class="menu-item"><a href="./index.html#trm"><i class="fa-solid fa-earth-americas"></i><span class="label">Evolución TRM</span></a></li>
-          <li class="menu-item"><a href="#" class="active"><i class="fa-solid fa-magnifying-glass-chart"></i><span class="label">Screener</span></a></li>
+          <li class="menu-item"><a href="#screener"><i class="fa-solid fa-magnifying-glass-chart"></i><span class="label">Screener</span></a></li>
           <li class="menu-item"><a href="./proyecciones.html#projections-top"><i class="fa-solid fa-chart-line"></i><span class="label">Proyecciones y WACC</span></a></li>
         </ul>
       </nav>
@@ -101,6 +101,16 @@
     </aside>
 
     <main>
+      <section id="summary" class="card">
+        <div class="section-header">
+          <h2>Resumen Ejecutivo</h2>
+          <span class="section-subtitle">Visión ejecutiva y hallazgos clave</span>
+        </div>
+        <div style="padding:16px 0 8px 0; color:var(--text-secondary);">
+          <p>Este resumen presenta los puntos más relevantes del análisis financiero: evolución de ingresos, rentabilidad, estructura de capital y observaciones sobre la TRM. Utilice las secciones laterales para navegar a detalles y la herramienta "Screener" para filtrar comparables.</p>
+        </div>
+      </section>
+
       <section id="indicators">
         <div class="section-header">
           <h2>Indicadores Financieros Clave</h2>
@@ -268,6 +278,26 @@
           </div>
         </div>
       </div>
+      
+      <section id="screener" class="card">
+        <div class="section-header">
+          <h2>Screener</h2>
+          <span class="section-subtitle">Filtra comparables por criterios básicos</span>
+        </div>
+        <div style="padding:12px 0; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+          <label style="font-weight:600; color:var(--text-secondary);">Ingreso mínimo (MM COP): <input id="screener-min-rev" type="number" style="margin-left:6px; width:140px;"></label>
+          <label style="font-weight:600; color:var(--text-secondary);">Margen mínimo (%): <input id="screener-min-margin" type="number" style="margin-left:6px; width:120px;"></label>
+          <button id="screener-run" style="padding:8px 12px; border-radius:8px; background:var(--accent-color); color:#fff; border:none; cursor:pointer;">Aplicar</button>
+        </div>
+        <div class="table-wrapper" style="margin-top:12px;">
+          <table id="screener-results">
+            <thead>
+              <tr><th>#</th><th>Razón Social</th><th>Ciudad</th><th>Ingresos (MM COP)</th><th>Margen Neto</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
     </main>
   </div>
   <script src="./menu.js" defer></script>
