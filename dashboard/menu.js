@@ -31,6 +31,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // If the page loaded with a hash, attempt to scroll to it and mark active
+  if (location.hash) {
+    const hid = location.hash.replace('#', '');
+    const el = document.getElementById(hid);
+    if (el) {
+      // Use setTimeout to allow browser to finish layout
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const menuItem = document.querySelector(`.side-menu a[href*="#${hid}"]`)?.closest('.menu-item');
+        if (menuItem) {
+          document.querySelectorAll('.side-menu .menu-item').forEach(mi => mi.classList.remove('active'));
+          menuItem.classList.add('active');
+        }
+      }, 80);
+    }
+  }
+
   // Highlight menu item based on scroll position
   if (sections.length) {
     const observer = new IntersectionObserver((entries) => {
