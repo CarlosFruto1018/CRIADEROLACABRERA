@@ -30,12 +30,7 @@
     // Prepare basic tables
     const fin = company.financials;
     const results = fin.estado_resultados.slice().sort((a,b)=>a.anio-b.anio);
-    const balance = fin.estado_situacion_financiera.slice().sort((a,b)=>a.anio-b.anio);
-    const cashflows = fin.estado_flujo_efectivo.slice().sort((a,b)=>a.anio-b.anio);
-
     const years = results.map(r=>r.anio);
-    const revenues = results.map(r=>r.ingresos_operacionales);
-    const netIncome = results.map(r=>r.ganancia_neta);
 
     // TRM yearly averages
     const rows = csvToRows(trmText);
@@ -49,9 +44,9 @@
     });
     const trmYearAvg = Object.keys(trmByYear).sort().map(y=>({anio:+y, avg: trmByYear[y].reduce((a,b)=>a+b,0)/trmByYear[y].length}));
 
-    // Simple projection (5 años) using last year as base and conservative defaults
+    // Projection defaults
     const last = results[results.length-1];
-    const baseRevenue = last.ingresos_operacionales;
+    const baseRevenue = last.ingresos_operacionales || 0;
     const defaultGrowth = 0.05;
     const ebitMargin = (last.ganancia_operacional||0)/ (last.ingresos_operacionales||1);
     const taxRate = 0.3;
@@ -64,85 +59,72 @@
     const WACC = Ke*equityWeight + kd*(1-t)*debtWeight;
 
     const projYears = []; let rev = baseRevenue;
-    for(let i=1;i<=5;i++){ rev = rev*(1+defaultGrowth); const ebit = rev * ebitMargin; const nopat = ebit*(1-taxRate); const da = rev*daPct; const capex=rev*capexPct; const dnwc=rev*nwcPct; const fcff = nopat + da - capex - dnwc; projYears.push({anio: last.anio + i, rev, ebit, nopat, da, capex, dnwc, fcff}); }
+    for(let i=1;i<=5;i++){
+      rev = rev*(1+defaultGrowth);
+      const ebit = rev * ebitMargin;
+      const nopat = ebit*(1-taxRate);
+      const da = rev*daPct;
+      const capex=rev*capexPct;
+      const dnwc=rev*nwcPct;
+      const fcff = nopat + da - capex - dnwc;
+      projYears.push({anio: last.anio + i, rev, ebit, nopat, da, capex, dnwc, fcff});
+    }
     const terminalFcff = projYears[projYears.length-1].fcff*(1+0.04);
     const tv = terminalFcff / (WACC/100 - 4/100);
 
-    // Build markdown
+    // Try to load custom resumen.md provided by user
     let md = '';
-    md += `# Informe Ejecutivo — ${company.company.razon_social}\n\n`;
-    md += `## Resumen Ejecutivo\n\n`;
-    md += `- Periodo analizado: ${years[0]} - ${years[years.length-1]}\n`;
-    md += `- Últimos ingresos (${last.anio}): ${last.ingresos_operacionales.toLocaleString()} ${fin.currency}\n`;
-      // If user provided a custom resumen, prefer it
-      let md = '';
-      try {
-        const r = await fetch('./custom_resumen.md');
-        if (r.ok) md = await r.text();
-      } catch (e) {
-        // ignore, proceed to auto-generate
-      }
+    try {
+      const r = await fetch('./custom_resumen.md');
+      if (r.ok) md = await r.text();
+    } catch (e) {
+      // ignore - will auto-generate
+    }
 
-      // Build markdown if not provided
-      if (!md) {
+    // Auto-generate markdown if custom not provided
+    if (!md) {
+      md += `# Informe Ejecutivo — ${company.company.razon_social}\n\n`;
+      md += `## Resumen Ejecutivo\n\n`;
+      md += `- Periodo analizado: ${years[0]} - ${years[years.length-1]}\n`;
+      md += `- Últimos ingresos (${last.anio}): ${last.ingresos_operacionales.toLocaleString()} ${fin.currency}\n\n`;
+      md += `## Descripción de la empresa\n\n`;
+      md += `- Razón social: ${company.company.razon_social}\n`;
+      md += `- NIT: ${company.company.nit}\n`;
+      md += `- Objeto social: ${company.company.objeto_social}\n`;
+      md += `- Ubicación: ${company.company.ubicacion.ciudad}, ${company.company.ubicacion.departamento}\n\n`;
 
-    md += `## Descripción de la empresa\n\n`;
-    md += `- Razón social: ${company.company.razon_social}\n`;
-    md += `- NIT: ${company.company.nit}\n`;
-    md += `- Objeto social: ${company.company.objeto_social}\n`;
-    md += `- Ubicación: ${company.company.ubicacion.ciudad}, ${company.company.ubicacion.departamento}\n\n`;
+      md += `## Análisis de Indicadores Financieros\n\n`;
+      md += `|Año|Ingresos|Ganancia Neta|Margen Neto (%)|\n|--:|--:|--:|--:|\n`;
+      results.forEach(r=>{
+        const margen = (r.ganancia_neta / (r.ingresos_operacionales||1))*100;
+        md += `|${r.anio}|${r.ingresos_operacionales.toLocaleString()}|${r.ganancia_neta.toLocaleString()}|${margen.toFixed(1)}|\n`;
+      }); md += '\n';
 
-    md += `## Análisis de Indicadores Financieros\n\n`;
-    md += `|Año|Ingresos|Ganancia Neta|Margen Neto (%)|\n|--:|--:|--:|--:|\n`;
-    results.forEach(r=>{
-      const margen = (r.ganancia_neta / (r.ingresos_operacionales||1))*100;
-      md += `|${r.anio}|${r.ingresos_operacionales.toLocaleString()}|${r.ganancia_neta.toLocaleString()}|${margen.toFixed(1)}|\n`;
-    }); md += '\n';
+      md += `## Análisis TRM y correlación\n\n`;
+      md += `Promedio anual TRM:\n\n`;
+      md += `|Año|TRM promedio|\n|--:|--:|\n`;
+      trmYearAvg.forEach(t=> md += `|${t.anio}|${t.avg.toFixed(2)}|\n`);
+      md += `\n`;
 
-    md += `## Benchmark Sectorial\n\n`;
-    md += `Se incluyen estadísticas relevantes (mediana y percentiles) extraídas del benchmark sectorial.\n\n`;
-    // include a small table for 2024 medians if present
-    const b2024 = benchmark.benchmark?.years?.includes(2024) ? benchmark.peer_stats?.["2024"]?.[0] : null;
-    if (b2024){ md += `|Indicador|Mediana Clase 0142 (2024)|\n|--|--:|\n|Ingresos (p50)|${Math.round(b2024.p50_ingresos).toLocaleString()}|\n|Margen neto (p50)|${(b2024.p50_margen_neto*100).toFixed(1)}%|\n\n`; }
+      const common = trmYearAvg.filter(t=> years.includes(t.anio)).map(t=>({anio:t.anio,trm:t.avg,rev: results.find(r=>r.anio===t.anio).ingresos_operacionales}));
+      function pearson(a,b){ const n=a.length; const ma=a.reduce((s,x)=>s+x,0)/n; const mb=b.reduce((s,x)=>s+x,0)/n; let num=0, da=0, db=0; for(let i=0;i<n;i++){ num+=(a[i]-ma)*(b[i]-mb); da+=(a[i]-ma)**2; db+=(b[i]-mb)**2; } return num/Math.sqrt(da*db); }
+      let corr = 'N/A'; if (common.length>=2){ corr = pearson(common.map(x=>x.trm), common.map(x=>x.rev)).toFixed(3); }
+      md += `Correlación (TRM promedio anual vs Ingresos): **${corr}**\n\n`;
 
-    md += `## Análisis TRM y correlación\n\n`;
-    md += `Promedio anual TRM:\n\n`;
-    md += `|Año|TRM promedio|\n|--:|--:|\n`;
-    trmYearAvg.forEach(t=> md += `|${t.anio}|${t.avg.toFixed(2)}|\n`);
-    md += `\n`;
+      md += `## Valoración por FCL (5 años)\n\n`;
+      md += `|Año|Ingresos|FCFF|Factor (WACC ${WACC.toFixed(2)}%)|PV FCFF|\n|--:|--:|--:|--:|--:|\n`;
+      const discountRate = 1 + WACC/100; let pvSum=0;
+      for(let i=0;i<projYears.length;i++){ const p=projYears[i]; const factor = 1/Math.pow(discountRate, i+1); const pv = p.fcff*factor; pvSum += pv; md += `|${p.anio}|${Math.round(p.rev).toLocaleString()}|${Math.round(p.fcff).toLocaleString()}|${factor.toFixed(4)}|${Math.round(pv).toLocaleString()}|\n`; }
+      const pvTerminal = tv / Math.pow(discountRate, projYears.length);
+      md += `|Terminal| - |${Math.round(tv).toLocaleString()}| - |${Math.round(pvTerminal).toLocaleString()}|\n\n`;
+      const enterprise = Math.round(pvSum + pvTerminal);
+      md += `**Valor presente de las operaciones (Enterprise Value): ${enterprise.toLocaleString()} ${fin.currency}**\n\n`;
 
-    // Correlate yearly revenues and trm averages where years overlap
-    const common = trmYearAvg.filter(t=> years.includes(t.anio)).map(t=>({anio:t.anio,trm:t.avg,rev: results.find(r=>r.anio===t.anio).ingresos_operacionales}));
-    function pearson(a,b){ const n=a.length; const ma=a.reduce((s,x)=>s+x,0)/n; const mb=b.reduce((s,x)=>s+x,0)/n; let num=0, da=0, db=0; for(let i=0;i<n;i++){ num+=(a[i]-ma)*(b[i]-mb); da+=(a[i]-ma)**2; db+=(b[i]-mb)**2; } return num/Math.sqrt(da*db); }
-    let corr = 'N/A'; if (common.length>=2){ corr = pearson(common.map(x=>x.trm), common.map(x=>x.rev)).toFixed(3); }
-    md += `Correlación (TRM promedio anual vs Ingresos): **${corr}**\n\n`;
+      md += `## Conclusión ejecutiva\n\n`;
+      md += `Con base en los datos disponibles, la empresa presenta (auto-resumen): ingresos recientes de ${last.ingresos_operacionales.toLocaleString()} y un valor de operaciones estimado en ${enterprise.toLocaleString()} COP.\n`;
+    }
 
-    md += `## Supuestos de proyección\n\n`;
-    md += `- Crecimiento anual de ingresos (base): ${(defaultGrowth*100).toFixed(1)}%\n`;
-    md += `- Margen EBIT base: ${(ebitMargin*100).toFixed(1)}%\n`;
-    md += `- Tasa de impuesto considerada: ${(taxRate*100).toFixed(1)}%\n`;
-    md += `- D&A: ${(daPct*100).toFixed(1)}% de ingresos; CAPEX: ${(capexPct*100).toFixed(1)}% de ingresos; ΔNWC: ${(nwcPct*100).toFixed(1)}% de ingresos\n\n`;
-
-    md += `## WACC (estimado)\n\n`;
-    md += `- Tasa libre de riesgo: ${rf}%\n- Beta: ${beta}\n- Prima de mercado: ${marketPrem}%\n- Prima país: ${countryPrem}%\n- Coste de capital propio (Ke): ${Ke.toFixed(2)}%\n- Coste de deuda (Kd): ${kd}% (pre impuestos)\n- Estructura: D/V=${debtWeight.toFixed(2)}, E/V=${equityWeight.toFixed(2)}\n- WACC estimado: ${WACC.toFixed(2)}%\n\n`;
-
-    md += `## Valoración por FCL (5 años)\n\n`;
-    md += `|Año|Ingresos|FCFF|Factor (WACC ${WACC.toFixed(2)}%)|PV FCFF|\n|--:|--:|--:|--:|--:|\n`;
-    const discountRate = 1 + WACC/100; let pvSum=0; for(let i=0;i<projYears.length;i++){ const p=projYears[i]; const factor = 1/Math.pow(discountRate, i+1); const pv = p.fcff*factor; pvSum += pv; md += `|${p.anio}|${Math.round(p.rev).toLocaleString()}|${Math.round(p.fcff).toLocaleString()}|${factor.toFixed(4)}|${Math.round(pv).toLocaleString()}|\n`; }
-    const pvTerminal = tv / Math.pow(discountRate, projYears.length);
-    md += `|Terminal| - |${Math.round(tv).toLocaleString()}| - |${Math.round(pvTerminal).toLocaleString()}|\n\n`;
-    const enterprise = Math.round(pvSum + pvTerminal);
-    md += `**Valor presente de las operaciones (Enterprise Value): ${enterprise.toLocaleString()} ${fin.currency}**\n\n`;
-
-    md += `## Sensibilidad (WACC ±1% / g ±1%)\n\n`;
-    md += `|WACC|g|Enterprise Value|\n|--:|--:|--:|\n`;
-    for(let dw=-1; dw<=1; dw++){ for(let dg=-1; dg<=1; dg++){ const w = (WACC + dw); const g = 4 + dg; const dr = 1 + w/100; const tv2 = terminalFcff / (w/100 - g/100); const pvterm2 = tv2 / Math.pow(dr, projYears.length); let pvfs=0; for(let i=0;i<projYears.length;i++){ pvfs += projYears[i].fcff / Math.pow(dr, i+1); } const ev = Math.round(pvfs + pvterm2); md += `|${w.toFixed(2)}%|${g.toFixed(1)}%|${ev.toLocaleString()}|\n`; }}
-
-    md += `\n## Conclusión ejecutiva\n\n`;
-    md += `Con base en los datos disponibles, la empresa presenta (auto-resumen): ingresos recientes de ${last.ingresos_operacionales.toLocaleString()} y un valor de operaciones estimado en ${enterprise.toLocaleString()} COP. Recomendaciones: profundizar en la sostenibilidad del margen EBIT y la estructura de capital para reducir el WACC.\n`;
-
-    // Create images: revenue trend, TRM, projection FCFF
-    // Create canvases
+    // Create canvases and charts (Chart.js is expected to be loaded)
     const c1 = document.createElement('canvas'); c1.width=1200; c1.height=600;
     const c2 = document.createElement('canvas'); c2.width=1200; c2.height=600;
     const c3 = document.createElement('canvas'); c3.width=1200; c3.height=600;
@@ -156,17 +138,21 @@
 
     // convert canvases to data URLs and add to zip
     const img1 = toBase64DataUrl(c1); const img2 = toBase64DataUrl(c2); const img3 = toBase64DataUrl(c3);
-    // strip header
     function dataUrlToBase64(dataUrl){ return dataUrl.split(',')[1]; }
     outputsFolder.file('trends_revenue.png', dataUrlToBase64(img1), {base64:true});
     outputsFolder.file('trends_trm.png', dataUrlToBase64(img2), {base64:true});
     outputsFolder.file('projection_fcff.png', dataUrlToBase64(img3), {base64:true});
 
-    // Add markdown file (reference images in outputs/)
-    md = md.replace('## Análisis TRM y correlación\n\n', '## Análisis TRM y correlación\n\n' + `![](outputs/trends_trm.png)\n\n`);
-    md = md.replace('## Análisis de Indicadores Financieros\n\n', '## Análisis de Indicadores Financieros\n\n' + `![](outputs/trends_revenue.png)\n\n`);
-    md = md.replace('## Valoración por FCL (5 años)\n\n', '## Valoración por FCL (5 años)\n\n' + `![](outputs/projection_fcff.png)\n\n`);
+    // Add top-level images with names used in custom resumen so links resolve
+    zip.file('fig1_ingresos_utilidad.png', dataUrlToBase64(img1), {base64:true});
+    zip.file('fig2_indicadores.png', dataUrlToBase64(img1), {base64:true});
+    zip.file('fig3_benchmark.png', dataUrlToBase64(img1), {base64:true});
+    zip.file('fig4_trm_vs_ingresos.png', dataUrlToBase64(img2), {base64:true});
+    zip.file('fig5_fcff.png', dataUrlToBase64(img3), {base64:true});
+    zip.file('fig6_sensibilidad.png', dataUrlToBase64(img3), {base64:true});
 
+    // Write resumen.md both at root and inside outputs/ for compatibility
+    zip.file('resumen.md', md);
     outputsFolder.file('resumen.md', md);
 
     const content = await zip.generateAsync({type:'blob'});
@@ -174,12 +160,22 @@
     const a = document.createElement('a'); a.href = url; a.download = 'outputs.zip'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   }
 
-      zip.file('resumen.md', md);
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
-    // Chart.js should already be present on dashboard pages. If not, load it.
-    if (typeof Chart === 'undefined') await loadScript('https://cdn.jsdelivr.net/npm/chart.js');
+  async function initButton(){
+    // ensure JSZip and Chart.js are available
+    try{
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+    }catch(e){ console.warn('Could not load JSZip:', e); }
+    if (typeof Chart === 'undefined'){
+      try{ await loadScript('https://cdn.jsdelivr.net/npm/chart.js'); } catch(e){ console.warn('Could not load Chart.js:', e); }
+    }
+
     const btns = Array.from(document.querySelectorAll('#download-report, #download-report-root'));
-    btns.forEach(b=> b.addEventListener('click', async (e)=>{ b.disabled=true; b.textContent='Generando...'; try{ await generate(); }catch(err){ alert('Error generando informe: '+err.message); console.error(err);} b.disabled=false; b.textContent='Descargar resumen'; }));
+    btns.forEach(b=> b.addEventListener('click', async (e)=>{ 
+      const orig = b.textContent;
+      try{ b.disabled=true; b.textContent='Generando...'; await generate(); }
+      catch(err){ alert('Error generando informe: '+err.message); console.error(err); }
+      finally{ b.disabled=false; b.textContent=orig; }
+    }));
   }
 
   document.addEventListener('DOMContentLoaded', initButton);
