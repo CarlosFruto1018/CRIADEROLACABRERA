@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CRIADERO LA CABRERA SAS</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --panel: rgba(255, 255, 255, 0.88);
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: rgba(148, 163, 184, 0.22);
+      --primary: #123b8a;
+      --accent: #0f766e;
+      --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(18, 59, 138, 0.10), transparent 30%),
+        radial-gradient(circle at top right, rgba(15, 118, 110, 0.10), transparent 28%),
+        linear-gradient(180deg, #fff 0%, var(--bg) 100%);
+    }
+    .shell {
+      width: min(1180px, calc(100% - 2rem));
+      margin: 0 auto;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 2rem 0;
+    }
+    .card {
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: clamp(1.5rem, 3vw, 2.5rem);
+      backdrop-filter: blur(12px);
+    }
+    .eyebrow {
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      font-size: .75rem;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    h1 {
+      margin: .75rem 0 .5rem;
+      font-size: clamp(2rem, 4vw, 3.6rem);
+      line-height: 1;
+      max-width: 14ch;
+    }
+    p { color: var(--muted); line-height: 1.6; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .link-card {
+      display: block;
+      padding: 1.1rem 1.15rem;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #fff;
+      text-decoration: none;
+      color: inherit;
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .link-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(18, 59, 138, 0.35);
+      box-shadow: 0 18px 30px rgba(15, 23, 42, 0.08);
+    }
+    .link-card strong { display: block; margin-bottom: .35rem; font-size: 1.05rem; }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem;
+      margin-top: 1.25rem;
+      font-size: .92rem;
+      color: var(--muted);
+    }
+    .pill {
+      padding: .45rem .75rem;
+      border-radius: 999px;
+      background: rgba(18, 59, 138, 0.08);
+      color: var(--primary);
+      font-weight: 700;
+    }
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="card">
+      <span class="eyebrow">CRIADERO LA CABRERA SAS</span>
+      <h1>Portal financiero</h1>
+      <p>
+        Acceso a la vista histórica, la valoración por flujos de caja libres y los archivos de datos del proyecto.
+      </p>
+
+      <div class="grid">
+        <a class="link-card" href="./dashboard/index.html">
+          <strong>Dashboard histórico</strong>
+          <span>Indicadores financieros, TRM, benchmark y métricas sectoriales.</span>
+        </a>
+        <a class="link-card" href="./dashboard/proyecciones.html">
+          <strong>Proyecciones y valoración</strong>
+          <span>Proyección a 5 años, FCFF, WACC y valor presente de operaciones.</span>
+        </a>
+      </div>
+
+      <div class="meta">
+        <span class="pill">Datos en JSON/CSV</span>
+        <span class="pill">Ejecución local con servidor estático</span>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

@@ -17,6 +17,7 @@ Archivos usados (debe existir en la carpeta padre):
 - `TRM_Historico_5Y.csv`
 
 Páginas principales:
+- `../index.html`: portada del proyecto.
 - `index.html`: dashboard histórico.
 - `proyecciones.html`: proyección de estados financieros, FCFF, WACC y valor presente de las operaciones.
 
