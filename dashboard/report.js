@@ -74,7 +74,17 @@
     md += `## Resumen Ejecutivo\n\n`;
     md += `- Periodo analizado: ${years[0]} - ${years[years.length-1]}\n`;
     md += `- Últimos ingresos (${last.anio}): ${last.ingresos_operacionales.toLocaleString()} ${fin.currency}\n`;
-    md += `- Ganancia neta (${last.anio}): ${last.ganancia_neta.toLocaleString()} ${fin.currency}\n\n`;
+      // If user provided a custom resumen, prefer it
+      let md = '';
+      try {
+        const r = await fetch('./custom_resumen.md');
+        if (r.ok) md = await r.text();
+      } catch (e) {
+        // ignore, proceed to auto-generate
+      }
+
+      // Build markdown if not provided
+      if (!md) {
 
     md += `## Descripción de la empresa\n\n`;
     md += `- Razón social: ${company.company.razon_social}\n`;
@@ -164,7 +174,7 @@
     const a = document.createElement('a'); a.href = url; a.download = 'outputs.zip'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   }
 
-  async function initButton(){
+      zip.file('resumen.md', md);
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
     // Chart.js should already be present on dashboard pages. If not, load it.
     if (typeof Chart === 'undefined') await loadScript('https://cdn.jsdelivr.net/npm/chart.js');
