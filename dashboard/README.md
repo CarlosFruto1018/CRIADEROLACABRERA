@@ -2,6 +2,9 @@
 
 Pequeña aplicación estática que visualiza indicadores financieros, la serie histórica de la TRM y una página adicional de proyecciones y valoración DCF.
 
+Objetivo del trabajo final:
+Elaborar un informe financiero ejecutivo sobre una empresa colombiana, integrando análisis de indicadores financieros, comparación con benchmark sectorial, evolución de la TRM, correlación con resultados empresariales y valoración por flujo de caja libre proyectado a cinco años.
+
 Cómo ejecutar (desde la carpeta `data`):
 
 ```powershell
