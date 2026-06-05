@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Financiero — CRIADERO LA CABRERA SAS</title>
+  
+  <!-- Iconos de FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Archivo de Estilos Principal -->
+  <link rel="stylesheet" href="./styles.css">
+  
+  <!-- Librería de Gráficos Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  
+  <!-- Header Principal -->
+  <header>
+    <div class="header-title-container">
+      <div class="header-logo">C</div>
+      <div>
+        <h1>CRIADERO LA CABRERA SAS</h1>
+        <span class="section-subtitle">NIT: 900433596 <span class="company-meta-badge">ACTIVA</span></span>
+      </div>
+    <!-- Navegación Principal -->
+    <nav class="header-nav">
+      <a href="./index.html" class="nav-link active"><i class="fa-solid fa-chart-line"></i> Dashboard Histórico</a>
+      <a href="./proyecciones.html" class="nav-link"><i class="fa-solid fa-calculator"></i> Proyecciones y Valoración</a>
+    </nav>
+    
+    <div class="header-actions">
+      <!-- Interruptor de Tema Claro/Oscuro -->
+      <button id="theme-toggle" class="theme-toggle-btn" title="Alternar Tema Claro/Oscuro" aria-label="Alternar Tema Claro/Oscuro">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Layout Principal con Sidebar + Main Panel -->
+  <div class="dashboard-container">
+    
+    <!-- Sidebar Izquierdo: Información y Controles Globales -->
+    <aside>
+      <!-- Identificación de la Empresa -->
+      <div class="sidebar-section">
+        <h3>Información General</h3>
+        <div class="company-info-card">
+          <p>
+            <span class="info-label">Objeto Social</span>
+            <span class="info-value">Cría de caballos y otros equinos</span>
+          </p>
+          <p>
+            <span class="info-label">Clasificación CIIU</span>
+            <span class="info-value">0142 (Sección A, División 01)</span>
+          </p>
+          <p>
+            <span class="info-label">Constitución</span>
+            <span class="info-value">2011-05-05 (15 años)</span>
+          </p>
+          <p>
+            <span class="info-label">Ubicación</span>
+            <span class="info-value"><i class="fa-solid fa-location-dot"></i> Cali, Valle del Cauca</span>
+          </p>
+        </div>
+      </div>
+      
+      <!-- Controles Globales -->
+      <div class="sidebar-section">
+        <h3>Filtros de Análisis</h3>
+        
+        <!-- Selector de Año Financiero -->
+        <div class="control-group">
+          <label for="year-selector" class="control-label">Año de Consulta:</label>
+          <select id="year-selector">
+            <option value="2024" selected>2024 (Último Año)</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+            <option value="2020">2020</option>
+            <option value="2019">2019</option>
+          </select>
+        </div>
+        
+        <!-- Selector de Peer Group (Sector) para Comparativa -->
+        <div class="control-group">
+          <label for="peer-selector" class="control-label">Grupo de Comparación (Sector):</label>
+          <select id="peer-selector">
+            <option value="clase" selected>Clase 0142 (4 empresas)</option>
+            <option value="division">División 01 (1,694 empresas)</option>
+            <option value="seccion">Sección A (1,785 empresas)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="sidebar-section" style="margin-top: auto;">
+        <div class="company-info-card" style="background-color: var(--accent-light); border-color: var(--accent-color); color: var(--text-secondary); text-align: center;">
+          <p style="font-weight: 600; font-size: 0.8rem; margin-bottom: 4px;">
+            <i class="fa-solid fa-circle-info"></i> Base de Datos SIIS
+          </p>
+          <p style="font-size: 0.75rem; color: var(--text-muted);">
+            Superintendencia de Sociedades de Colombia
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Panel de Contenido Principal -->
+    <main>
+      
+      <!-- Fila 1: KPIs y Tarjetas de Métricas -->
+      <section>
+        <div class="section-header">
+          <h2>Indicadores Financieros Clave</h2>
+          <span class="section-subtitle" id="kpi-year-label">Año de análisis: 2024</span>
+        </div>
+        
+        <div class="metrics-grid">
+          <!-- Tarjeta 1: Ingresos -->
+          <div class="metric-card success">
+            <div>
+              <div class="metric-title">Ingresos Operacionales</div>
+              <div class="metric-value" id="kpi-ingresos">-</div>
+            </div>
+            <div class="metric-footer" id="kpi-ingresos-footer">
+              <span class="trend-badge trend-up"><i class="fa-solid fa-arrow-up"></i> -%</span>
+              <span class="metric-footer-text">vs año anterior</span>
+            </div>
+          </div>
+          
+          <!-- Tarjeta 2: Utilidad Neta -->
+          <div class="metric-card success">
+            <div>
+              <div class="metric-title">Ganancia Neta</div>
+              <div class="metric-value" id="kpi-utilidad-neta">-</div>
+            </div>
+            <div class="metric-footer" id="kpi-utilidad-neta-footer">
+              <span class="trend-badge trend-up"><i class="fa-solid fa-arrow-up"></i> -%</span>
+              <span class="metric-footer-text">vs año anterior</span>
+            </div>
+          </div>
+
+          <!-- Tarjeta 3: Margen Neto -->
+          <div class="metric-card">
+            <div>
+              <div class="metric-title">Margen Neto</div>
+              <div class="metric-value" id="kpi-margen-neto">-%</div>
+            </div>
+            <div class="metric-footer" id="kpi-margen-neto-footer">
+              <span class="metric-footer-text">De cada peso vendido</span>
+            </div>
+          </div>
+
+          <!-- Tarjeta 4: Razón Corriente -->
+          <div class="metric-card warning">
+            <div>
+              <div class="metric-title">Razón Corriente</div>
+              <div class="metric-value" id="kpi-razon-corriente">-x</div>
+            </div>
+            <div class="metric-footer" id="kpi-razon-corriente-footer">
+              <span class="metric-footer-text">Capacidad de pago C/P</span>
+            </div>
+          </div>
+
+          <!-- Tarjeta 5: Endeudamiento -->
+          <div class="metric-card danger">
+            <div>
+              <div class="metric-title">Nivel Endeudamiento</div>
+              <div class="metric-value" id="kpi-endeudamiento">-%</div>
+            </div>
+            <div class="metric-footer" id="kpi-endeudamiento-footer">
+              <span class="metric-footer-text">Financiación externa</span>
+            </div>
+          </div>
+
+          <!-- Tarjeta 6: ROA -->
+          <div class="metric-card">
+            <div>
+              <div class="metric-title">Rentabilidad Activos (ROA)</div>
+              <div class="metric-value" id="kpi-roa">-%</div>
+            </div>
+            <div class="metric-footer" id="kpi-roa-footer">
+              <span class="metric-footer-text">Eficiencia sobre activos</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Fila 2: Gráficos de Tendencias y Balance -->
+      <div class="charts-container-grid">
+        <!-- Gráfico de Tendencias Financieras -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title"><i class="fa-solid fa-chart-column"></i> Evolución de Ingresos y Ganancias (COP)</h3>
+            <span class="section-subtitle">Histórico 2019 - 2024</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="financialTrendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Gráfico de Composición del Balance General -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title"><i class="fa-solid fa-scale-balanced"></i> Estructura del Balance General</h3>
+            <span class="section-subtitle" id="balance-chart-year-label">Año 2024</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="balanceStructureChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fila 3: Gráfico TRM Histórico -->
+      <section class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h3 class="chart-title"><i class="fa-solid fa-money-bill-trend-up"></i> Comportamiento Histórico TRM (COP/USD)</h3>
+            <span class="section-subtitle">Tasa Representativa del Mercado del Peso Colombiano</span>
+          </div>
+          <!-- Controles de rango de fecha para TRM -->
+          <div class="chart-controls">
+            <div class="btn-group" id="trm-range-selector">
+              <button data-range="90">3M</button>
+              <button data-range="180">6M</button>
+              <button data-range="365" class="active">1A</button>
+              <button data-range="1095">3A</button>
+              <button data-range="all">5A</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel de Estadísticas Dinámicas de la TRM -->
+        <div class="trm-stats-panel">
+          <div class="trm-stat-box">
+            <div class="trm-stat-label">Último Valor</div>
+            <div class="trm-stat-value" id="trm-stat-latest">-</div>
+          </div>
+          <div class="trm-stat-box">
+            <div class="trm-stat-label">Valor Máximo</div>
+            <div class="trm-stat-value" id="trm-stat-max">-</div>
+          </div>
+          <div class="trm-stat-box">
+            <div class="trm-stat-label">Valor Mínimo</div>
+            <div class="trm-stat-value" id="trm-stat-min">-</div>
+          </div>
+          <div class="trm-stat-box">
+            <div class="trm-stat-label">Variación Período</div>
+            <div class="trm-stat-value" id="trm-stat-change">-</div>
+          </div>
+        </div>
+
+        <div class="chart-canvas-wrapper" style="height: 300px;">
+          <canvas id="trmChart"></canvas>
+        </div>
+      </section>
+
+      <!-- Fila 4: Benchmarking Sectorial vs Percentiles -->
+      <div class="charts-container-grid">
+        <!-- Gráfico de Comparativa Sectorial -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title"><i class="fa-solid fa-users-viewfinder"></i> Comparación vs Competidores (Benchmarking)</h3>
+            <span class="section-subtitle" id="benchmark-chart-subtitle">Año 2024 · Clase 0142</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="benchmarkChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Tabla de Ranking Sectorial -->
+        <div class="table-card">
+          <div class="chart-header">
+            <h3 class="chart-title"><i class="fa-solid fa-ranking-star"></i> Ranking Clase 0142 — Top por Ingresos</h3>
+            <span class="section-subtitle">Clase 0142 · 4 empresas</span>
+          </div>
+          <div class="table-wrapper">
+            <table id="ranking-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Razón Social</th>
+                  <th>Ciudad</th>
+                  <th style="text-align: right;">Ingresos (MM COP)</th>
+                  <th style="text-align: right;">Activos (MM COP)</th>
+                  <th style="text-align: right;">Margen Neto</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Se poblará dinámicamente con JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Archivo de Lógica de la Aplicación -->
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

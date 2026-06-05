@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Proyecciones y Valoración — CRIADERO LA CABRERA SAS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="./proyecciones.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">C</div>
+      <div>
+        <div class="eyebrow">Valuación financiera</div>
+        <h1>CRIADERO LA CABRERA SAS</h1>
+        <p>Proyección de estados financieros, FCFF y valor presente de las operaciones</p>
+      </div>
+    </div>
+
+    <nav class="topnav">
+      <a href="./index.html"><i class="fa-solid fa-chart-line"></i> Dashboard histórico</a>
+      <a href="./proyecciones.html" class="active"><i class="fa-solid fa-calculator"></i> Proyecciones</a>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <section class="hero card">
+      <div>
+        <span class="eyebrow">DCF / FCFF</span>
+        <h2>Valoración por flujos de caja libres descontados</h2>
+        <p id="model-summary">Cargando datos financieros...</p>
+      </div>
+      <div class="hero-metrics">
+        <div class="hero-metric">
+          <span>Valor presente de operaciones</span>
+          <strong id="enterprise-value">-</strong>
+        </div>
+        <div class="hero-metric">
+          <span>WACC</span>
+          <strong id="wacc-value">-</strong>
+        </div>
+        <div class="hero-metric">
+          <span>PV FCFF proyectado</span>
+          <strong id="pv-fcff-value">-</strong>
+        </div>
+        <div class="hero-metric">
+          <span>PV valor terminal</span>
+          <strong id="pv-terminal-value">-</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <aside class="sidebar card">
+        <div class="panel-header">
+          <h3>Supuestos del modelo</h3>
+          <button id="reset-button" class="ghost-button" type="button">Restablecer</button>
+        </div>
+
+        <div class="input-group">
+          <label for="revenue-growth">Crecimiento inicial de ingresos</label>
+          <input id="revenue-growth" type="number" step="0.1">
+        </div>
+        <div class="input-group">
+          <label for="ebit-margin">Margen EBIT objetivo al año 5</label>
+          <input id="ebit-margin" type="number" step="0.1">
+        </div>
+        <div class="input-group">
+          <label for="tax-rate">Tasa efectiva de impuestos</label>
+          <input id="tax-rate" type="number" step="0.1">
+        </div>
+        <div class="input-group">
+          <label for="da-pct">D&A como % de ingresos</label>
+          <input id="da-pct" type="number" step="0.1">
+        </div>
+        <div class="input-group">
+          <label for="capex-pct">Capex como % de ingresos</label>
+          <input id="capex-pct" type="number" step="0.1">
+        </div>
+        <div class="input-group">
+          <label for="nwc-pct">NWC incremental como % de ingresos</label>
+          <input id="nwc-pct" type="number" step="0.1">
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="input-group">
+          <label for="risk-free-rate">Tasa libre de riesgo</label>
+          <input id="risk-free-rate" type="number" step="0.1">
+        </div>
+        <div class="input-group">
+          <label for="beta">Beta comparable</label>
+          <input id="beta" type="number" step="0.1">
+        </div>
+        <div class="input-group">
+          <label for="market-risk-premium">Prima de mercado</label>
+          <input id="market-risk-premium" type="number" step="0.1">
+        </div>
+        <div class="input-group">
+          <label for="country-risk-premium">Prima de riesgo país</label>
+          <input id="country-risk-premium" type="number" step="0.1">
+        </div>
+        <div class="input-group">
+          <label for="debt-weight">Peso de deuda en la estructura</label>
+          <input id="debt-weight" type="number" step="0.1">
+        </div>
+        <div class="input-group">
+          <label for="cost-of-debt">Costo de deuda pre-impuestos</label>
+          <input id="cost-of-debt" type="number" step="0.1">
+        </div>
+        <div class="input-group">
+          <label for="terminal-growth">Crecimiento terminal de largo plazo</label>
+          <input id="terminal-growth" type="number" step="0.1">
+        </div>
+
+        <p class="helper-text">El caso base se calibra con tendencias históricas y todos los supuestos pueden ajustarse manualmente.</p>
+      </aside>
+
+      <section class="content">
+        <div class="kpi-grid">
+          <article class="kpi card">
+            <span>Ke</span>
+            <strong id="cost-equity">-</strong>
+          </article>
+          <article class="kpi card">
+            <span>Coste de deuda neto</span>
+            <strong id="after-tax-debt">-</strong>
+          </article>
+          <article class="kpi card">
+            <span>Deuda financiera observada</span>
+            <strong id="financial-debt">-</strong>
+          </article>
+          <article class="kpi card">
+            <span>Caja y equivalentes</span>
+            <strong id="cash-balance">-</strong>
+          </article>
+        </div>
+
+        <section class="card chart-card">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Tendencia y proyección</span>
+              <h3>Ingresos, EBIT y flujo libre proyectado</h3>
+            </div>
+            <p>Histórico 2019-2024 y proyección 2025-2029</p>
+          </div>
+          <div class="chart-frame">
+            <canvas id="projection-chart"></canvas>
+          </div>
+        </section>
+
+        <section class="card chart-card">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Descuento de caja</span>
+              <h3>Valor presente de FCFF y valor terminal</h3>
+            </div>
+            <p>Descuento aplicado con WACC calculado</p>
+          </div>
+          <div class="chart-frame">
+            <canvas id="valuation-chart"></canvas>
+          </div>
+        </section>
+
+        <section class="card table-card">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Detalle del modelo</span>
+              <h3>Proyección de los flujos de caja libre</h3>
+            </div>
+            <p>Valor presente por año y valor terminal</p>
+          </div>
+          <div class="table-wrap">
+            <table id="projection-table">
+              <thead>
+                <tr>
+                  <th>Año</th>
+                  <th>Ingresos</th>
+                  <th>EBIT</th>
+                  <th>NOPAT</th>
+                  <th>D&A</th>
+                  <th>Capex</th>
+                  <th>ΔNWC</th>
+                  <th>FCFF</th>
+                  <th>Factor</th>
+                  <th>PV FCFF</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </section>
+
+    <section class="assumptions card">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Fórmulas</span>
+          <h3>Base metodológica</h3>
+        </div>
+        <p>FCFF = NOPAT + D&A - Capex - ΔNWC</p>
+      </div>
+      <div class="formula-grid">
+        <div>
+          <h4>WACC</h4>
+          <p>Ke = Rf + β × prima de mercado + prima país</p>
+          <p>WACC = Ke × E/V + Kd × (1 - T) × D/V</p>
+        </div>
+        <div>
+          <h4>Valor terminal</h4>
+          <p>VT = FCFF<sub>6</sub> / (WACC - g)</p>
+          <p>g corresponde al crecimiento de largo plazo de 4% anual.</p>
+        </div>
+        <div>
+          <h4>Nota de estructura</h4>
+          <p>En 2024 no se observa deuda financiera material en el estado de situación financiera, por lo que el caso base arranca con una estructura casi totalmente patrimonial.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./proyecciones.js"></script>
+</body>
+</html>
