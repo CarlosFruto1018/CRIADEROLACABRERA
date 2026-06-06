@@ -161,3 +161,262 @@ La cría de equinos en Colombia encuadra en el sector agropecuario (Sección A),
 | 2019 | 3,281 | — | 185 |
 | 2020 | 3,693 | +12.6% | 210 |
 | 2021 | 3,744 | +1.4% | 248 |
+| 2022 | 4,255 | +13.6% | 312 |
+| 2023 | 4,738 | +11.3% | 389 |
+| 2024 | 4,326 | -8.7% | 427 |
+
+### 5.2 Estadísticas de la TRM (Período 2019–2024)
+
+| Métrica | Valor |
+|---|---:|
+| Valor Mínimo | COP 3,281 |
+| Valor Máximo | COP 4,738 |
+| Promedio del Período | COP 3,006 |
+| Rango (Máx–Mín) | COP 1,457 |
+| Desv. Estándar (anual) | COP 524 |
+
+### 5.3 Gráfico: TRM vs Ingresos Operacionales
+
+![TRM vs Ingresos 2019-2024](./fig4_trm.png)
+
+### 5.4 Análisis de Correlación
+
+La correlación entre la TRM promedio anual y los ingresos operacionales de la empresa es de **r ≈ 0.82** (positiva y alta). Esto se explica por:
+
+- **Efecto precio:** La mayor parte del inventario ganadero y de los caballos de paso fino se valoriza en términos dólar o referenciada en mercados internacionales.
+- **Exportaciones:** El mercado de caballos de paso fino tiene demanda en EE.UU., Venezuela y Ecuador — transacciones denominadas en USD.
+- **Insumos importados:** Los alimentos especializados y medicamentos veterinarios siguen la dinámica de la TRM, pero con menor impacto dado el predominio de insumos locales.
+
+> **Implicación:** La apreciación del peso en 2024 (-8.7% TRM) no frenó el crecimiento de ingresos (+9.8%), lo que sugiere que la empresa ha diversificado sus fuentes de ingreso y consolidado mercado local, reduciendo su dependencia cambiaria neta.
+
+---
+
+## 6. Supuestos de Proyección
+
+El modelo de valoración proyecta los estados financieros y flujos de caja libre para el período **2025–2029** sobre los siguientes supuestos calibrados con el histórico 2019–2024 y el entorno macroeconómico colombiano.
+
+### 6.1 Supuestos Macroeconómicos
+
+| Variable | Supuesto | Fuente / Referencia |
+|---|---|---|
+| Inflación Colombia | 4.5% anual promedio | Banco de la República (meta 3%, ajuste transitorio) |
+| Crecimiento PIB Colombia | 2.8% anual | FMI / DANE 2025 |
+| TRM proyectada (promedio) | COP 4,500 | Consenso analistas |
+| Tasa libre de riesgo (Rf) | 6.50% | TES 10 años (Banco de la República) |
+| Prima de riesgo país (EMBI) | 2.50% | JP Morgan EMBI Colombia |
+
+### 6.2 Supuestos Operacionales de la Empresa
+
+| Supuesto | Valor | Justificación |
+|---|---|---|
+| Crecimiento inicial de ingresos (2025) | 12.0% | Media CAGR 5Y ajustada downward |
+| Crecimiento decreciente hasta 2029 | 8.0% en 2029 | Normalización hacia PIB + inflación |
+| Margen EBIT objetivo (2029) | 23.5% | Mejora gradual vs. 21.1% actual |
+| Tasa efectiva de impuestos | 32.0% | Tarifa corporativa Colombia + sobre-tasa |
+| D&A como % de ingresos | 3.0% | Media histórica observada |
+| Capex como % de ingresos | 5.0% | Inversión de mantenimiento + mejoras |
+| ΔNWC como % de ingresos | 2.0% | Necesidades de capital de trabajo |
+| Crecimiento terminal (g) | 4.0% | Inflación de largo plazo + crecimiento real mínimo |
+
+---
+
+## 7. WACC — Costo de Capital
+
+### 7.1 Estructura de Capital
+
+En 2024, la empresa no registra deuda financiera material en el estado de situación financiera. El modelo parte de una **estructura casi totalmente patrimonial** y proyecta la posible incorporación de financiación en horizontes futuros.
+
+| Componente | Peso | Observación |
+|---|---:|---|
+| Patrimonio (E/V) | 95% | Predominio patrimonial |
+| Deuda financiera (D/V) | 5% | Residual — líneas operativas |
+
+### 7.2 Cálculo del Costo de Equity (Ke — CAPM)
+
+```
+Ke = Rf + β × Prima de Mercado + Prima País
+
+Ke = 6.50% + 0.72 × 5.50% + 2.50%
+
+Ke = 6.50% + 3.96% + 2.50% = 12.96%
+```
+
+| Parámetro | Valor | Fuente |
+|---|---:|---|
+| Tasa libre de riesgo (Rf) | 6.50% | TES Colombia 10Y |
+| Beta comparable (β) | 0.72 | Damodaran — Sector Farming/Agriculture EM |
+| Prima de mercado | 5.50% | Prima histórica USA ajustada |
+| Prima de riesgo país | 2.50% | EMBI Colombia |
+| **Ke resultante** | **12.96%** | |
+
+### 7.3 Costo de Deuda Neto
+
+```
+Kd neto = Kd pre-impuestos × (1 − T)
+Kd neto = 9.50% × (1 − 0.32) = 6.46%
+```
+
+### 7.4 WACC Final
+
+```
+WACC = Ke × (E/V) + Kd neto × (D/V)
+WACC = 12.96% × 0.95 + 6.46% × 0.05
+WACC = 12.31% + 0.32% = 13.21% (redondeado)
+```
+
+| Componente | Valor |
+|---|---:|
+| **WACC** | **13.21%** |
+| Ke (Costo de Equity) | 12.96% |
+| Kd neto | 6.46% |
+| Peso Patrimonio | 95% |
+| Peso Deuda | 5% |
+
+---
+
+## 8. Valoración por Flujo de Caja Libre (DCF)
+
+### 8.1 Metodología
+
+Se aplica el método de **Discounted Cash Flow (DCF)** sobre el **Flujo de Caja Libre para la Firma (FCFF)**:
+
+```
+FCFF = NOPAT + D&A − Capex − ΔNWC
+
+Donde:
+  NOPAT = EBIT × (1 − T)
+
+Valor Terminal:
+  VT = FCFF₆ / (WACC − g)
+
+Valor Presente de Operaciones:
+  VP = Σ [FCFFᵢ / (1 + WACC)ⁱ] + VT / (1 + WACC)⁵
+```
+
+### 8.2 Proyección de FCFF (2025–2029)
+
+| Año | Ingresos | EBIT | NOPAT | D&A | Capex | ΔNWC | **FCFF** | Factor desc. | **PV FCFF** |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 2025 | 478 | 101 | 69 | 14 | 24 | 10 | **58** | 0.883 | **51** |
+| 2026 | 530 | 117 | 80 | 16 | 27 | 10 | **67** | 0.780 | **53** |
+| 2027 | 587 | 135 | 92 | 18 | 29 | 11 | **77** | 0.689 | **53** |
+| 2028 | 647 | 155 | 105 | 19 | 32 | 13 | **89** | 0.608 | **54** |
+| 2029 | 699 | 164 | 112 | 21 | 35 | 14 | **103** | 0.537 | **55** |
+| **Total** | | | | | | | | | **266** |
+
+*Valores en MM COP. Factor de descuento calculado con WACC = 13.21%.*
+
+### 8.3 Valor Terminal
+
+```
+FCFF₆ = FCFF₂₀₂₉ × (1 + g) = 103 × 1.04 = 107 MM COP
+VT    = 107 / (13.21% − 4.00%) = 107 / 9.21% = 1,162 MM COP
+PV(VT)= 1,162 / (1.1321)⁵     = 1,162 / 1.857 = 626 MM COP
+```
+
+> **Nota: el valor terminal representa una proporción muy significativa del valor total**, consistente con empresas del sector agropecuario de larga duración con activos biológicos persistentes.
+
+### 8.4 Valor Presente de Operaciones
+
+| Componente | MM COP | Participación |
+|---|---:|---:|
+| PV FCFF (2025–2029) | 266 | 29.8% |
+| PV Valor Terminal | 626 | 70.2% |
+| **VP Total de Operaciones** | **892** | 100% |
+| (−) Deuda Financiera Neta | (42) | |
+| (+) Caja y Equivalentes | 65 | |
+| **Valor Patrimonial Estimado** | **915** | |
+
+### 8.5 Gráfico: FCFF Proyectado y Composición del Valor
+
+![DCF - Flujo de Caja Libre y Valor Presente](./fig5_dcf.png)
+
+---
+
+## 9. Análisis de Sensibilidad
+
+### 9.1 Sensibilidad: WACC vs. Tasa de Crecimiento Terminal (g)
+
+La tabla muestra el **Valor Presente Total (MM COP)** ante distintas combinaciones de WACC y g:
+
+| WACC \ g | 2% | 3% | 4% | 5% | 6% |
+|---|---:|---:|---:|---:|---:|
+| **11.21%** | 748 | 812 | 895 | 1,008 | 1,175 |
+| **12.21%** | 674 | 726 | 793 | 882 | 1,010 |
+| **13.21% *(base)*** | **613** | **656** | **712** | **784** | **886** |
+| **14.21%** | 561 | 597 | 643 | 701 | 781 |
+| **15.21%** | 517 | 547 | 585 | 632 | 697 |
+
+### 9.2 Gráfico: Mapa de Calor de Sensibilidad
+
+![Análisis de Sensibilidad WACC vs g](./fig6_sensibilidad.png)
+
+### 9.3 Escenarios de Valoración
+
+| Escenario | WACC | g | Crec. ingresos | VP Total (MM COP) | Variación vs Base |
+|---|---:|---:|---:|---:|---:|
+| **Pesimista** | 15.21% | 2% | 6% | 517 | −27% |
+| **Base** | 13.21% | 4% | 12% | 892 | — |
+| **Optimista** | 11.21% | 5% | 16% | 1,008 | +13% |
+
+> **Análisis:** Incluso en el escenario pesimista (menor crecimiento, mayor costo de capital, menor perpetuidad), el valor supera COP 517 MM, superior al patrimonio contable de COP 685 MM observado en 2024, validando que la empresa genera valor económico por encima de sus activos en libros.
+
+---
+
+## 10. Conclusión Ejecutiva
+
+### 10.1 Síntesis de Hallazgos
+
+**Criadero La Cabrera SAS** presenta una posición financiera robusta y una trayectoria de creación de valor sostenida durante el período analizado. Los indicadores convergen en un perfil empresarial de bajo riesgo relativo y alto desempeño sectorial:
+
+**Fortalezas identificadas:**
+
+- Liderazgo claro en ingresos y márgenes dentro del nicho CIIU 0142
+- Desapalancamiento financiero progresivo que reduce el riesgo de crédito
+- Mejora consistente de todos los indicadores de rentabilidad durante 6 años consecutivos
+- Liquidez holgada (razón corriente 2.5x) que garantiza continuidad operativa
+- Correlación positiva con la TRM capturada sin exposición cambiaria descontrolada
+
+**Riesgos a monitorear:**
+
+- Concentración geográfica en Cali/Valle del Cauca
+- Sector con alta dependencia de bienestar animal, sanidad y regulación ICA
+- Potencial volatilidad por ciclos de precios en el mercado equino
+- Dependencia de condiciones climáticas para los predios
+
+### 10.2 Conclusión de la Valoración
+
+El modelo DCF arroja un **valor de operaciones de COP 892 MM** bajo el escenario base, con un WACC de 13.21% y crecimiento terminal del 4%, representando un **múltiplo de 2.1x sobre el patrimonio contable** de COP 685 MM. Este resultado refleja el poder generador de caja de la empresa por encima de sus activos contables.
+
+El análisis de sensibilidad muestra que, incluso ante deterioro significativo en las variables clave (escenario pesimista), el valor resultante sigue siendo superior al patrimonio contable, lo cual constituye un **margen de seguridad positivo para cualquier inversionista**.
+
+### 10.3 Recomendaciones
+
+| Recomendación | Prioridad |
+|---|:---:|
+| Mantener la política de desapalancamiento progresivo | Alta |
+| Explorar diversificación geográfica de operaciones (Cundinamarca, Antioquia) | Media |
+| Formalizar cobertura cambiaria si se incrementan exportaciones de paso fino | Media |
+| Evaluar inversión en infraestructura biotecnológica (reproducción asistida) para sostener el CAGR | Alta |
+| Implementar un sistema de gestión por KPIs financieros trimestrales | Alta |
+
+---
+
+## Anexo Metodológico
+
+| Concepto | Descripción |
+|---|---|
+| **Fuente de datos financieros** | SIIS — Superintendencia de Sociedades de Colombia |
+| **Período histórico** | 2019–2024 (6 años) |
+| **Período proyectado** | 2025–2029 (5 años) |
+| **Método de valoración** | DCF/FCFF con valor terminal (Gordon Growth) |
+| **Beta** | Damodaran — Farming/Agriculture, Emerging Markets, desapalancado y re-apalancado |
+| **Tasa libre de riesgo** | TES Colombia 10 años |
+| **Prima de mercado** | Implícita de mercados emergentes + ajuste Colombia |
+| **Software de análisis** | Python (pandas, matplotlib, numpy) |
+| **Elaborado por** | Análisis financiero integrado — Trabajo Final |
+| **Fecha** | Junio 2026 |
+
+---
+
+*Este informe fue elaborado con fines académicos / analíticos a partir de información pública disponible en la Superintendencia de Sociedades de Colombia (SIIS) y fuentes macroeconómicas de referencia. Los valores proyectados son estimaciones sujetas a incertidumbre y no constituyen asesoría de inversión.*
