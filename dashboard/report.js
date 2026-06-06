@@ -129,15 +129,29 @@
     const c2 = document.createElement('canvas'); c2.width=1200; c2.height=600;
     const c3 = document.createElement('canvas'); c3.width=1200; c3.height=600;
 
-    // revenue chart
-    new Chart(c1.getContext('2d'), { type: 'bar', data: { labels: results.map(r=>r.anio), datasets:[{ label:'Ingresos', data: results.map(r=>r.ingresos_operacionales), backgroundColor:'#2563eb' }] }, options:{ plugins:{ legend:{display:false} }, scales:{ y:{ ticks:{ callback: v=> Number(v).toLocaleString() } } } } });
-    // trm chart
-    new Chart(c2.getContext('2d'), { type:'line', data:{ labels: trmYearAvg.map(t=>t.anio), datasets:[{ label:'TRM promedio', data: trmYearAvg.map(t=>t.avg), borderColor:'#0f766e', tension:0.2 }] }, options:{ plugins:{ legend:{display:false} } } });
-    // projection chart
-    new Chart(c3.getContext('2d'), { type:'line', data:{ labels: projYears.map(p=>p.anio), datasets:[ { label:'Ingresos proyectados', data: projYears.map(p=>p.rev), borderColor:'#1d4ed8', tension:0.2 }, { label:'FCFF', data: projYears.map(p=>p.fcff), borderColor:'#10b981', tension:0.2 } ] }, options:{ interaction:{ mode:'index', intersect:false } } });
+    // append canvases off-screen so Chart.js can measure and render them properly
+    const _hiddenContainer = document.createElement('div');
+    _hiddenContainer.style.position = 'fixed'; _hiddenContainer.style.left = '-9999px'; _hiddenContainer.style.top = '-9999px';
+    _hiddenContainer.appendChild(c1); _hiddenContainer.appendChild(c2); _hiddenContainer.appendChild(c3);
+    document.body.appendChild(_hiddenContainer);
 
-    // convert canvases to data URLs and add to zip
-    const img1 = toBase64DataUrl(c1); const img2 = toBase64DataUrl(c2); const img3 = toBase64DataUrl(c3);
+    // revenue chart
+    const chart1 = new Chart(c1.getContext('2d'), { type: 'bar', data: { labels: results.map(r=>r.anio), datasets:[{ label:'Ingresos', data: results.map(r=>r.ingresos_operacionales), backgroundColor:'#2563eb' }] }, options:{ plugins:{ legend:{display:false} }, scales:{ y:{ ticks:{ callback: v=> Number(v).toLocaleString() } } } } });
+    // trm chart
+    const chart2 = new Chart(c2.getContext('2d'), { type:'line', data:{ labels: trmYearAvg.map(t=>t.anio), datasets:[{ label:'TRM promedio', data: trmYearAvg.map(t=>t.avg), borderColor:'#0f766e', tension:0.2 }] }, options:{ plugins:{ legend:{display:false} } } });
+    // projection chart
+    const chart3 = new Chart(c3.getContext('2d'), { type:'line', data:{ labels: projYears.map(p=>p.anio), datasets:[ { label:'Ingresos proyectados', data: projYears.map(p=>p.rev), borderColor:'#1d4ed8', tension:0.2 }, { label:'FCFF', data: projYears.map(p=>p.fcff), borderColor:'#10b981', tension:0.2 } ] }, options:{ interaction:{ mode:'index', intersect:false } } });
+
+    // ensure charts have rendered before extracting images
+    await new Promise(resolve => requestAnimationFrame(resolve));
+
+    // use Chart.js helper to get fully rendered image data URLs
+    const img1 = (typeof chart1.toBase64Image === 'function') ? chart1.toBase64Image() : toBase64DataUrl(c1);
+    const img2 = (typeof chart2.toBase64Image === 'function') ? chart2.toBase64Image() : toBase64DataUrl(c2);
+    const img3 = (typeof chart3.toBase64Image === 'function') ? chart3.toBase64Image() : toBase64DataUrl(c3);
+
+    // remove hidden canvases from DOM
+    _hiddenContainer.remove();
     function dataUrlToBase64(dataUrl){ return dataUrl.split(',')[1]; }
     outputsFolder.file('trends_revenue.png', dataUrlToBase64(img1), {base64:true});
     outputsFolder.file('trends_trm.png', dataUrlToBase64(img2), {base64:true});
@@ -150,6 +164,95 @@
     zip.file('fig4_trm_vs_ingresos.png', dataUrlToBase64(img2), {base64:true});
     zip.file('fig5_fcff.png', dataUrlToBase64(img3), {base64:true});
     zip.file('fig6_sensibilidad.png', dataUrlToBase64(img3), {base64:true});
+
+    // Attempt to include any user-provided images placed in ./images/
+    // First, prefer an explicit manifest at ./images/manifest.json listing filenames (array).
+    try {
+      let urls = [];
+      try {
+        const m = await fetch('./images/manifest.json');
+        if (m.ok) {
+          const list = await m.json();
+          if (Array.isArray(list)) {
+            urls = list.map(name => new URL(name, location.href).href);
+          } else if (list && typeof list === 'object') {
+            // manifest as mapping: {"zipName.png":"sourceName.jpg", ...}
+            // convert to array of objects for predictable naming
+            const entries = Object.entries(list).map(([zipName, src]) => ({zipName, url: new URL('./images/' + src, location.href).href}));
+            // handle entries separately below
+            urls = entries;
+          }
+        }
+      } catch (e) {
+        // manifest missing or invalid — fallback to directory listing
+      }
+
+      if (urls.length === 0) {
+        // fallback: try to parse a public directory listing at ./images/
+        try {
+          const imgsIndex = await fetch('./images/');
+          if (imgsIndex.ok) {
+            const html = await imgsIndex.text();
+            try {
+              const doc = new DOMParser().parseFromString(html, 'text/html');
+              const elems = Array.from(doc.querySelectorAll('a, img'));
+              elems.forEach(el => {
+                const ref = el.getAttribute('href') || el.getAttribute('src');
+                if (!ref) return;
+                if (/\.(png|jpe?g|gif|svg)(\?|$)/i.test(ref)) {
+                  const abs = new URL(ref, location.href).href;
+                  urls.push(abs);
+                }
+              });
+            } catch (e) {
+              // fallback: regex
+              const re = /href=["']([^"']+\.(?:png|jpe?g|gif|svg))(?:["'])/ig;
+              let mm;
+              while ((mm = re.exec(html))) urls.push(new URL(mm[1], location.href).href);
+            }
+          }
+        } catch (e) { /* ignore */ }
+      }
+
+      // dedupe while preserving possible mapping objects
+      if (urls.length && typeof urls[0] === 'string') {
+        urls = Array.from(new Set(urls));
+      } else if (urls.length && typeof urls[0] === 'object') {
+        const seen = new Set();
+        urls = urls.filter(e => { if (seen.has(e.url)) return false; seen.add(e.url); return true; });
+      }
+      async function blobToBase64(blob){
+        return await new Promise((resolve, reject) => {
+          const fr = new FileReader();
+          fr.onload = () => resolve(fr.result.split(',')[1]);
+          fr.onerror = reject;
+          fr.readAsDataURL(blob);
+        });
+      }
+
+      for (const item of urls) {
+        try {
+          if (typeof item === 'string') {
+            const r = await fetch(item);
+            if (!r.ok) continue;
+            const blob = await r.blob();
+            const b64 = await blobToBase64(blob);
+            const name = decodeURIComponent(item.split('/').pop().split('?')[0]);
+            zip.file('images/' + name, b64, {base64:true});
+            outputsFolder.file('images/' + name, b64, {base64:true});
+          } else if (item && typeof item === 'object') {
+            const r = await fetch(item.url);
+            if (!r.ok) continue;
+            const blob = await r.blob();
+            const b64 = await blobToBase64(blob);
+            const zipName = (item.zipName || decodeURIComponent(item.url.split('/').pop().split('?')[0]));
+            // save with desired zip name
+            zip.file(zipName, b64, {base64:true});
+            outputsFolder.file(zipName, b64, {base64:true});
+          }
+        } catch (e) { console.warn('Could not include image', item, e); }
+      }
+    } catch (e) { console.warn('images inclusion failed', e); }
 
     // Write resumen.md both at root and inside outputs/ for compatibility
     zip.file('resumen.md', md);
