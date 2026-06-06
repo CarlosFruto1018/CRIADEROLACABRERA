@@ -21,11 +21,22 @@
 
   async function generate(){
     const zip = new JSZip();
+    // determine base path of this script so fetches work whether script is loaded from /dashboard/ or root
+    let scriptBase = './';
+    try {
+      const cur = document.currentScript && document.currentScript.src ? document.currentScript.src : null;
+      if (!cur) {
+        const s = Array.from(document.getElementsByTagName('script')).reverse().find(x=>/report\.js(\?|$)/.test(x.src));
+        if (s) scriptBase = s.src.replace(/\/?report\.js(\?.*)?$/, '/');
+      } else {
+        scriptBase = cur.replace(/\/?report\.js(\?.*)?$/, '/');
+      }
+    } catch (e) { scriptBase = './'; }
     const outputsFolder = zip.folder('outputs');
 
-    const company = await fetchJson('../CRIADERO_LA_CABRERA_SAS_900433596.json');
-    const benchmark = await fetchJson('../Benchmark_CRIADERO_LA_CABRERA_SAS_900433596.json');
-    const trmText = await (await fetch('../TRM_Historico_5Y.csv')).text();
+    const company = await fetchJson(new URL('../CRIADERO_LA_CABRERA_SAS_900433596.json', scriptBase).href);
+    const benchmark = await fetchJson(new URL('../Benchmark_CRIADERO_LA_CABRERA_SAS_900433596.json', scriptBase).href);
+    const trmText = await (await fetch(new URL('../TRM_Historico_5Y.csv', scriptBase).href)).text();
 
     // Prepare basic tables
     const fin = company.financials;
@@ -75,7 +86,7 @@
     // Try to load custom resumen.md provided by user
     let md = '';
     try {
-      const r = await fetch('./custom_resumen.md');
+      const r = await fetch(new URL('./custom_resumen.md', scriptBase).href);
       if (r.ok) md = await r.text();
     } catch (e) {
       // ignore - will auto-generate
@@ -170,7 +181,7 @@
     try {
       let urls = [];
       try {
-        const m = await fetch('./images/manifest.json');
+        const m = await fetch(new URL('./images/manifest.json', scriptBase).href);
         if (m.ok) {
           const list = await m.json();
           if (Array.isArray(list)) {
@@ -190,7 +201,7 @@
       if (urls.length === 0) {
         // fallback: try to parse a public directory listing at ./images/
         try {
-          const imgsIndex = await fetch('./images/');
+          const imgsIndex = await fetch(new URL('./images/', scriptBase).href);
           if (imgsIndex.ok) {
             const html = await imgsIndex.text();
             try {
